@@ -18,7 +18,8 @@ export function AddressSearch() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // Use ReturnType<typeof setTimeout> for browser compatibility in TS builds
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const searchAddresses = useCallback(async (searchQuery: string) => {
     if (searchQuery.length < 3) {
