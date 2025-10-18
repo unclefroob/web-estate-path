@@ -23,6 +23,16 @@ vi.mock("./services/addressService", () => ({
   },
 }));
 
+// Mock the property service
+vi.mock("./services/propertyService", () => ({
+  propertyService: {
+    getUserProperties: vi.fn(),
+    createProperty: vi.fn(),
+    getPropertyById: vi.fn(),
+    deleteProperty: vi.fn(),
+  },
+}));
+
 describe("App", () => {
   const mockAuthContext: AuthContextType = {
     user: null,
@@ -104,5 +114,15 @@ describe("App", () => {
       screen.getByRole("heading", { name: /estate path dashboard/i })
     ).toBeInTheDocument();
     expect(screen.getByText(/welcome, john doe!/i)).toBeInTheDocument();
+  });
+
+  it("redirects to auth page when accessing /properties without login", () => {
+    renderApp({ user: null }, "/properties");
+    expect(screen.getByRole("heading", { name: /login/i })).toBeInTheDocument();
+  });
+
+  it("shows loading spinner when accessing /properties while loading", () => {
+    renderApp({ isLoading: true }, "/properties");
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
   });
 });

@@ -50,4 +50,19 @@ export const api = {
 
     return handleResponse<T>(response);
   },
+
+  async delete<T>(endpoint: string, token?: string): Promise<T> {
+    const headers: HeadersInit = {};
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      method: "DELETE",
+      headers,
+    });
+
+    return handleResponse<T>(response);
+  },
 };

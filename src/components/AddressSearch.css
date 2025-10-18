@@ -187,11 +187,89 @@
   animation: fadeIn 0.3s ease;
 }
 
+.selected-address-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
 .selected-address h3 {
   color: #333;
   font-size: 1.4rem;
-  margin-bottom: 16px;
+  margin: 0;
   font-weight: 600;
+}
+
+.save-property-button {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.save-property-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.save-property-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.save-property-button.success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.success-message {
+  padding: 12px 16px;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+  color: #155724;
+  margin-bottom: 16px;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
+}
+
+.login-prompt {
+  margin-top: 16px;
+  padding: 16px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  color: #856404;
+  text-align: center;
+}
+
+.login-prompt p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.login-prompt-inline {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #e7f3ff;
+  border: 1px solid #667eea;
+  border-radius: 8px;
+  color: #2c5aa0;
+  text-align: center;
+}
+
+.login-prompt-inline p {
+  margin: 0;
+  font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .address-details {

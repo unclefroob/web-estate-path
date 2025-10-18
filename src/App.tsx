@@ -4,6 +4,8 @@ import { Navigation } from "./components/Navigation";
 import { AuthPage } from "./components/AuthPage";
 import { Dashboard } from "./components/Dashboard";
 import { AddressSearch } from "./components/AddressSearch";
+import { SavedProperties } from "./components/SavedProperties";
+import { PropertyDetails } from "./components/PropertyDetails";
 import "./App.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -33,6 +35,22 @@ function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/properties"
+          element={
+            <ProtectedRoute>
+              <SavedProperties />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/properties/:id"
+          element={
+            <ProtectedRoute>
+              <PropertyDetails />
             </ProtectedRoute>
           }
         />

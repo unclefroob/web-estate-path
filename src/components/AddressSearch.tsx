@@ -1,9 +1,14 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { addressService } from "../services/addressService";
+import { propertyService } from "../services/propertyService";
+import { useAuth } from "../context/AuthContext";
 import type { AddressSuggestion } from "../types/address";
 import "./AddressSearch.css";
 
 export function AddressSearch() {
+  const { user, accessToken } = useAuth();
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -11,6 +16,8 @@ export function AddressSearch() {
   const [selectedAddress, setSelectedAddress] =
     useState<AddressSuggestion | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const searchAddresses = useCallback(async (searchQuery: string) => {
@@ -63,6 +70,94 @@ export function AddressSearch() {
     setSelectedAddress(suggestion);
     setShowSuggestions(false);
     setSuggestions([]);
+    setSaveSuccess(false);
+  };
+
+  const handleSaveProperty = async () => {
+    if (!selectedAddress) {
+      setError("Please select an address first");
+      return;
+    }
+
+    // Extract required fields
+    const number = selectedAddress.address.house_number || "";
+    const street = selectedAddress.address.road || "";
+    const suburb = selectedAddress.address.suburb || "";
+    const state = selectedAddress.address.state || "";
+    const postcode = selectedAddress.address.postcode || "";
+
+    // Validate required fields
+    if (!number || !street || !suburb || !state || !postcode) {
+      setError(
+        "Address is missing required information. Please select a complete address."
+      );
+      return;
+    }
+
+    // If not logged in, store the address and redirect to login
+    if (!user || !accessToken) {
+      // Store the property data in localStorage
+      const propertyToSave = {
+        unit: selectedAddress.address.unit,
+        number,
+        street,
+        suburb,
+        state,
+        postcode,
+        fullAddress: selectedAddress.display_name,
+        coordinates: {
+          lat: selectedAddress.lat,
+          lon: selectedAddress.lon,
+        },
+      };
+      localStorage.setItem(
+        "pendingPropertySave",
+        JSON.stringify(propertyToSave)
+      );
+
+      // Redirect to login page
+      window.location.href = "/auth";
+      return;
+    }
+
+    // User is logged in, proceed with save
+    setIsSaving(true);
+    setError(null);
+    setSaveSuccess(false);
+
+    try {
+      const response = await propertyService.createProperty(
+        {
+          unit: selectedAddress.address.unit,
+          number,
+          street,
+          suburb,
+          state,
+          postcode,
+          fullAddress: selectedAddress.display_name,
+          coordinates: {
+            lat: selectedAddress.lat,
+            lon: selectedAddress.lon,
+          },
+        },
+        accessToken
+      );
+
+      if (response.success && response.data?.property) {
+        // Redirect to the property details page
+        navigate(`/properties/${response.data.property._id}`, {
+          state: { message: "Property saved successfully!" },
+        });
+      } else {
+        setError(response.message || "Failed to save property");
+      }
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to save property";
+      setError(errorMessage);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleClear = () => {
@@ -71,6 +166,7 @@ export function AddressSearch() {
     setSelectedAddress(null);
     setError(null);
     setShowSuggestions(false);
+    setSaveSuccess(false);
   };
 
   // Cleanup timer on unmount
@@ -81,6 +177,47 @@ export function AddressSearch() {
       }
     };
   }, []);
+
+  // Auto-save pending property after login
+  useEffect(() => {
+    const handlePendingPropertySave = async () => {
+      const pendingPropertySave = localStorage.getItem("pendingPropertySave");
+      const loginSuccess = localStorage.getItem("loginSuccess");
+
+      if (pendingPropertySave && loginSuccess && user && accessToken) {
+        try {
+          const propertyData = JSON.parse(pendingPropertySave);
+
+          setIsSaving(true);
+          const response = await propertyService.createProperty(
+            propertyData,
+            accessToken
+          );
+
+          // Clean up
+          localStorage.removeItem("pendingPropertySave");
+          localStorage.removeItem("loginSuccess");
+
+          // Redirect to the property details page if save was successful
+          if (response.success && response.data?.property) {
+            navigate(`/properties/${response.data.property._id}`, {
+              state: { message: "Property saved successfully!" },
+            });
+          } else {
+            setError(response.message || "Failed to save property");
+          }
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to save property";
+          setError(errorMessage);
+        } finally {
+          setIsSaving(false);
+        }
+      }
+    };
+
+    handlePendingPropertySave();
+  }, [user, accessToken]);
 
   return (
     <div className="address-search">
@@ -179,11 +316,51 @@ export function AddressSearch() {
 
         {selectedAddress && (
           <div className="selected-address">
-            <h3>Selected Address</h3>
+            <div className="selected-address-header">
+              <h3>Selected Address</h3>
+              <button
+                onClick={handleSaveProperty}
+                disabled={isSaving || saveSuccess}
+                className={`save-property-button ${
+                  saveSuccess ? "success" : ""
+                }`}
+                aria-label="Save property"
+              >
+                {isSaving
+                  ? "Saving..."
+                  : saveSuccess
+                  ? "✓ Saved!"
+                  : "Save Property"}
+              </button>
+            </div>
+
+            {!user && (
+              <div className="login-prompt-inline">
+                <p>Click "Save Property" to log in and save this address</p>
+              </div>
+            )}
+
+            {saveSuccess && (
+              <div className="success-message" role="status">
+                Property saved successfully!
+              </div>
+            )}
+
             <div className="address-details">
               <p>
                 <strong>Address:</strong> {selectedAddress.display_name}
               </p>
+              {selectedAddress.address.unit && (
+                <p>
+                  <strong>Unit:</strong> {selectedAddress.address.unit}
+                </p>
+              )}
+              {selectedAddress.address.house_number && (
+                <p>
+                  <strong>Number:</strong>{" "}
+                  {selectedAddress.address.house_number}
+                </p>
+              )}
               {selectedAddress.address.road && (
                 <p>
                   <strong>Street:</strong> {selectedAddress.address.road}

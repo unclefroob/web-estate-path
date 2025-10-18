@@ -23,6 +23,9 @@ export function Navigation() {
 
           {user ? (
             <>
+              <Link to="/properties" className="nav-link">
+                My Properties
+              </Link>
               <Link to="/dashboard" className="nav-link">
                 Dashboard
               </Link>

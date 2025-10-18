@@ -74,6 +74,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           response.data.accessToken,
           response.data.refreshToken
         );
+
+        // Check if there's a pending property save
+        const pendingPropertySave = localStorage.getItem("pendingPropertySave");
+        if (pendingPropertySave) {
+          // Redirect to search page where the auto-save will happen
+          localStorage.setItem("loginSuccess", "true");
+          window.location.href = "/search";
+        }
       } else {
         throw new Error("Invalid response from server");
       }
@@ -104,6 +112,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           response.data.accessToken,
           response.data.refreshToken
         );
+
+        // Check if there's a pending property save
+        const pendingPropertySave = localStorage.getItem("pendingPropertySave");
+        if (pendingPropertySave) {
+          // Redirect to search page where the auto-save will happen
+          localStorage.setItem("loginSuccess", "true");
+          window.location.href = "/search";
+        }
       } else {
         throw new Error("Invalid response from server");
       }

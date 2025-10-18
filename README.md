@@ -6,6 +6,9 @@ A modern React + TypeScript web application for Estate Path, featuring authentic
 
 - 🔐 **User Authentication** - Login and registration with email/password
 - 🏠 **Address Search** - Search Australian addresses with autocomplete (public access)
+- 💾 **Save Properties** - Save addresses for later review (auto-login flow for unauthenticated users)
+- 📋 **Property Listing** - View and manage all saved properties in one place
+- 🗑️ **Property Management** - Delete saved properties with confirmation
 - 🗺️ **Routing** - Client-side routing with protected and public routes
 - 🧭 **Navigation** - Dynamic navigation bar with auth-aware links
 - 🎨 **Modern UI** - Beautiful, responsive design with gradient themes
@@ -65,6 +68,8 @@ The application has the following routes:
 - `/` - Redirects to `/search`
 - `/search` - **Public** address search page with autocomplete
 - `/auth` - **Public** login and registration page
+- `/properties` - **Protected** saved properties list (requires authentication)
+- `/properties/:id` - **Protected** property details page (requires authentication)
 - `/dashboard` - **Protected** user dashboard (requires authentication)
 
 ## Available Scripts
@@ -83,6 +88,8 @@ The application has the following routes:
 src/
 ├── components/          # React components
 │   ├── AddressSearch.tsx   # Address search with autocomplete
+│   ├── SavedProperties.tsx # Saved properties list & management
+│   ├── PropertyDetails.tsx # Property details page
 │   ├── Navigation.tsx      # Navigation bar component
 │   ├── AuthPage.tsx        # Main authentication page
 │   ├── LoginForm.tsx       # Login form component
@@ -94,10 +101,12 @@ src/
 ├── services/            # API service layer
 │   ├── api.ts              # Base API utilities
 │   ├── authService.ts      # Authentication service
-│   └── addressService.ts   # Address search service
+│   ├── addressService.ts   # Address search service
+│   └── propertyService.ts  # Property management service
 ├── types/               # TypeScript type definitions
 │   ├── auth.ts             # Authentication types
-│   └── address.ts          # Address search types
+│   ├── address.ts          # Address search types
+│   └── property.ts         # Property types
 ├── test/                # Test configuration
 │   └── setup.ts            # Test setup file
 ├── App.tsx              # Main App with routing
@@ -127,9 +136,35 @@ Both login and registration forms include comprehensive validation:
 - Name length validation
 - Real-time error messages
 
+### Address Search & Property Management
+
+1. **Search Addresses**: Search for Australian addresses using free Nominatim API
+2. **Save Properties**: Save addresses to your account (with auto-login flow)
+3. **View Saved Properties**: View all saved properties in the `/properties` page
+4. **Property Details**: Click on any property to view comprehensive details
+5. **Delete Properties**: Remove properties with confirmation dialog
+6. **View on Maps**: Open property location in Google Maps
+7. **Australian Format Support**: Handles unit notation (e.g., "1/17" for Unit 1, 17 Main St)
+
+**Save Without Login Flow:**
+
+- Unauthenticated users can search and click "Save Property"
+- Address is stored in localStorage
+- User is redirected to login/signup
+- After successful authentication, property is automatically saved
+- User is redirected to the property details page
+
+**Property Details Page:**
+
+- Beautiful gradient header with property address
+- Organized sections for address, location, and property info
+- View property location on Google Maps
+- Delete property from details page
+- Clickable property cards from list view
+
 ### Protected Routes
 
-The Dashboard component is only accessible to authenticated users. The app automatically redirects to the login page if the user is not authenticated.
+The Dashboard, Saved Properties, and Property Details pages are only accessible to authenticated users. The app automatically redirects to the login page if the user is not authenticated.
 
 ## Testing
 
@@ -162,11 +197,24 @@ This application integrates with the [estate-path-api](../estate-path-api) backe
 
 ### API Endpoints Used:
 
+**Authentication:**
+
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - Login user
 - `POST /api/auth/logout` - Logout user
 - `POST /api/auth/refresh` - Refresh access token
 - `GET /api/auth/me` - Get current user profile
+
+**Address Search:**
+
+- `GET /api/address/search?query={searchTerm}` - Search Australian addresses
+
+**Property Management:**
+
+- `GET /api/properties` - Get all saved properties
+- `POST /api/properties` - Save a new property
+- `GET /api/properties/:id` - Get a single property
+- `DELETE /api/properties/:id` - Delete a property
 
 ### Authentication Headers
 
