@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { authService } from "../services/authService";
 import type { User, AuthContextType } from "../types/auth";
 
@@ -13,6 +14,7 @@ const STORAGE_KEYS = {
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
@@ -80,8 +82,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (pendingPropertySave) {
           // Redirect to search page where the auto-save will happen
           localStorage.setItem("loginSuccess", "true");
-          window.location.href = "/search";
+          navigate("/search");
+          return;
         }
+
+        // Get the redirect location from localStorage (set when user was redirected to login)
+        const redirectTo = localStorage.getItem("redirectAfterLogin");
+        localStorage.removeItem("redirectAfterLogin");
+
+        // Redirect to the original location or home as fallback
+        navigate(redirectTo || "/search", { replace: true });
       } else {
         throw new Error("Invalid response from server");
       }
@@ -118,8 +128,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (pendingPropertySave) {
           // Redirect to search page where the auto-save will happen
           localStorage.setItem("loginSuccess", "true");
-          window.location.href = "/search";
+          navigate("/search");
+          return;
         }
+
+        // Get the redirect location from localStorage (set when user was redirected to login)
+        const redirectTo = localStorage.getItem("redirectAfterLogin");
+        localStorage.removeItem("redirectAfterLogin");
+
+        // Redirect to the original location or home as fallback
+        navigate(redirectTo || "/search", { replace: true });
       } else {
         throw new Error("Invalid response from server");
       }

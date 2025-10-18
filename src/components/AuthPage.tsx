@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { LoginForm } from "./LoginForm";
 import { SignupForm } from "./SignupForm";
@@ -6,8 +7,18 @@ import { SignupForm } from "./SignupForm";
 type AuthMode = "login" | "signup";
 
 export function AuthPage() {
+  const navigate = useNavigate();
   const [mode, setMode] = useState<AuthMode>("login");
-  const { login, register, isLoading, error } = useAuth();
+  const { user, login, register, isLoading, error } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      const redirectTo = localStorage.getItem("redirectAfterLogin");
+      localStorage.removeItem("redirectAfterLogin");
+      navigate(redirectTo || "/search", { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (email: string, password: string) => {
     await login(email, password);
