@@ -185,7 +185,11 @@ export function PropertyDetails() {
               )}
               <div className="detail-item">
                 <span className="detail-label">Number</span>
-                <span className="detail-value">{property.number}</span>
+                <span className="detail-value">
+                  {property.number.includes("/")
+                    ? property.number.split("/").pop() || property.number
+                    : property.number}
+                </span>
               </div>
               <div className="detail-item">
                 <span className="detail-label">Street</span>

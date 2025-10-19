@@ -9,16 +9,21 @@ import type { Property } from "../types/property";
 export const formatAustralianAddress = (property: Property): string => {
   const parts: string[] = [];
 
+  // Extract base number from property.number (remove unit prefix if present)
+  const baseNumber = property.number.includes("/")
+    ? property.number.split("/").pop() || property.number
+    : property.number;
+
   // Unit/Number Street (abbreviate street type)
   const streetPart = property.unit
-    ? `${property.unit}/${property.number} ${abbreviateStreetType(
-        property.street
-      )}`
-    : `${property.number} ${abbreviateStreetType(property.street)}`;
+    ? `${property.unit}/${baseNumber} ${abbreviateStreetType(property.street)}`
+    : `${baseNumber} ${abbreviateStreetType(property.street)}`;
   parts.push(streetPart);
 
-  // Suburb STATE Postcode
-  parts.push(`${property.suburb} ${property.state} ${property.postcode}`);
+  // Suburb STATE Postcode (abbreviate state)
+  parts.push(
+    `${property.suburb} ${abbreviateState(property.state)} ${property.postcode}`
+  );
 
   return parts.join(", ");
 };
@@ -51,4 +56,23 @@ export const abbreviateStreetType = (street: string): string => {
     result = result.replace(new RegExp(`\\b${full}\\b`, "gi"), abbrev);
   }
   return result;
+};
+
+/**
+ * Abbreviate Australian state names
+ * Converts full state names to their standard abbreviations
+ */
+export const abbreviateState = (state: string): string => {
+  const stateAbbreviations: Record<string, string> = {
+    Victoria: "VIC",
+    "New South Wales": "NSW",
+    Queensland: "QLD",
+    "Western Australia": "WA",
+    "South Australia": "SA",
+    Tasmania: "TAS",
+    "Australian Capital Territory": "ACT",
+    "Northern Territory": "NT",
+  };
+
+  return stateAbbreviations[state] || state;
 };

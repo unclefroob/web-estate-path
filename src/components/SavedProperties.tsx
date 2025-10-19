@@ -6,6 +6,7 @@ import type { Property } from "../types/property";
 import {
   formatAustralianAddress,
   abbreviateStreetType,
+  abbreviateState,
 } from "../utils/addressFormatter";
 import "./SavedProperties.css";
 
@@ -169,7 +170,9 @@ export function SavedProperties() {
 
                   <div className="detail-row">
                     <span className="detail-label">State:</span>
-                    <span className="detail-value">{property.state}</span>
+                    <span className="detail-value">
+                      {abbreviateState(property.state)}
+                    </span>
                   </div>
 
                   <div className="detail-row">
