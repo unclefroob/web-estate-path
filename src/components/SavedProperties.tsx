@@ -3,6 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { propertyService } from "../services/propertyService";
 import type { Property } from "../types/property";
+import {
+  formatAustralianAddress,
+  abbreviateStreetType,
+} from "../utils/addressFormatter";
 import "./SavedProperties.css";
 
 export function SavedProperties() {
@@ -85,16 +89,6 @@ export function SavedProperties() {
     }
   };
 
-  const formatAddress = (property: Property): string => {
-    const parts = [];
-    if (property.unit) parts.push(`Unit ${property.unit}`);
-    parts.push(`${property.number} ${property.street}`);
-    parts.push(property.suburb);
-    parts.push(property.state);
-    parts.push(property.postcode);
-    return parts.join(", ");
-  };
-
   if (!user) {
     return (
       <div className="saved-properties-container">
@@ -156,15 +150,15 @@ export function SavedProperties() {
                 className="property-card-link"
               >
                 <div className="property-header">
-                  <h3>{property.fullAddress || formatAddress(property)}</h3>
+                  <h3>{formatAustralianAddress(property)}</h3>
                 </div>
 
                 <div className="property-details">
                   <div className="detail-row">
                     <span className="detail-label">Address:</span>
                     <span className="detail-value">
-                      {property.unit && `Unit ${property.unit}, `}
-                      {property.number} {property.street}
+                      {property.unit && `${property.unit}/`}
+                      {property.number} {abbreviateStreetType(property.street)}
                     </span>
                   </div>
 
@@ -185,7 +179,7 @@ export function SavedProperties() {
 
                   {property.coordinates && (
                     <div className="detail-row">
-                      <span className="detail-label">Coordinates:</span>
+                      <span className="detail-label">Location:</span>
                       <span className="detail-value">
                         {property.coordinates.lat}, {property.coordinates.lon}
                       </span>
@@ -198,11 +192,9 @@ export function SavedProperties() {
                       {new Date(property.createdAt).toLocaleDateString(
                         "en-AU",
                         {
-                          year: "numeric",
-                          month: "short",
                           day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
+                          month: "short",
+                          year: "numeric",
                         }
                       )}
                     </span>

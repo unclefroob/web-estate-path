@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { propertyService } from "../services/propertyService";
 import type { Property } from "../types/property";
+import { formatAustralianAddress } from "../utils/addressFormatter";
 import "./PropertyDetails.css";
 
 export function PropertyDetails() {
@@ -159,7 +160,7 @@ export function PropertyDetails() {
 
       <div className="property-card-detail">
         <div className="property-main-info">
-          <h1>{property.fullAddress}</h1>
+          <h1>{formatAustralianAddress(property)}</h1>
           <p className="property-saved-date">
             Saved on{" "}
             {new Date(property.createdAt).toLocaleDateString("en-AU", {
